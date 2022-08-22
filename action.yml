@@ -183,7 +183,7 @@ runs:
         [ "$IMGTYPE" != "factory" ] && unset IMGTYPE
         sudo mv -v $GITHUB_WORKSPACE/arm-profiles /usr/share/manjaro-arm-tools/profiles
         if [ -z ${{ inputs.overlay-repo }} ]; then 
-          sudo buildarmimg -d $DEVICE -e $EDITION -v $VERSION -b $BRANCH ${IMGTYPE:+-f}
+          sudo buildarmimg -d $DEVICE -e $EDITION -v $VERSION -b $BRANCH -i packages ${IMGTYPE:+-f} 
         else
           sudo buildarmimg -d $DEVICE -e $EDITION -v $VERSION -b $BRANCH -k ${{ inputs.overlay-repo }} -i packages ${IMGTYPE:+-f}
         fi
