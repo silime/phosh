@@ -1,0 +1,259 @@
+name: 'Manjaro Image Action'
+description: 'Installs prerequisites for building Manjaro ARM on ubuntu'
+inputs:
+  arm-profiles-repo:
+    description: 'arm-profiles to clone'
+    required: false
+    default: 'https://gitlab.manjaro.org/manjaro-arm/applications/arm-profiles'
+  device:
+    description: 'name of the device the build is for'
+    required: true
+  edition:
+    description: 'name of the profile to build'
+    required: true
+  branch:
+    description: 'stable (default), testing, unstable'
+    required: false
+    default: stable
+  version:
+    description: 'image version'
+    required: false
+    default: "YY.MM"
+  overlay-repo:
+    description: 'custom overlay repo'
+    required: false
+  imgtype:
+    description: 'image type: normal (default), factory'
+    required: false
+    default: normal
+#  CI_PUB_KEY:
+#    description: 'public gpg key to use'
+#    required: true
+#  CI_GPG_SECRET: 
+#    description: 'private key to use'
+#    required: true
+#  CI_GPG_PASSPHRASE: 
+#    description: 'passphrase for private key'
+#    required: true
+outputs:
+  file-pkg:
+    description: "compressed files"
+    value: ${{ steps.build.outputs.file-pkg }}
+  file-path:
+    description: "path of the generated image"
+    value: ${{ steps.build.outputs.file-path }}
+  file-sha1:
+    description: "checksum file for the image"
+    value: ${{ steps.build.outputs.file-sha1 }}
+  file-torrent:
+    description: "torrent file for the image"
+    value: ${{ steps.build.outputs.file-torrent }}
+  file-signature:
+    description: "signature file for the image"
+    value: ${{ steps.build.outputs.file-signature }}
+runs:
+  using: "composite"
+  steps:
+    -  
+      name: install-build-dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt install \
+          gdisk \
+          zip \
+          systemd-container \
+          bmap-tools asciidoc \
+          libarchive-tools \
+          git \
+          build-essential \
+          cmake \
+          libarchive-dev \
+          pkg-config \
+          libcurl4-openssl-dev \
+          libgpgme-dev \
+          libssl-dev \
+          fakeroot \
+          dh-autoreconf \
+          qemu-utils \
+          qemu-efi-aarch64 \
+          qemu-system-arm \
+          qemu-user-static \
+          mktorrent \
+          paperkey \
+          gpg \
+          ca-certificates \
+          u-boot-tools
+        sudo pip3 install meson
+        sudo pip3 install ninja
+          
+    - id: install-pacman
+      shell: bash
+      env:
+        PACMAN_VERSION: 6.0.1
+      run: |
+        sudo git clone --depth 1 https://gitlab.manjaro.org/packages/core/pacman.git
+        pushd pacman
+          sudo wget https://sources.archlinux.org/other/pacman/pacman-${PACMAN_VERSION}.tar.xz
+          sudo tar -xvf pacman-${PACMAN_VERSION}.tar.xz
+          pushd pacman-${PACMAN_VERSION}
+            sudo patch -p1 -i ../pacman-sync-first-option.patch
+            sudo meson --prefix=/usr \
+                      --buildtype=plain \
+                      -Ddoc=disabled \
+                      -Ddoxygen=enabled \
+                      -Dscriptlet-shell=/usr/bin/bash \
+                      -Dldconfig=/usr/bin/ldconfig \
+                      build
+            sudo meson compile -C build
+            sudo meson install -C build
+          popd
+          sudo install -m644 pacman.conf /etc/pacman.conf
+          sudo install -m644 makepkg.conf /etc/
+          sudo mkdir -p /etc/pacman.d
+          sudo touch /etc/pacman.d/mirrorlist
+        popd
+    -
+      name: setup-qemu-binfmt
+      shell: bash
+      run: |
+        sudo wget https://gitlab.manjaro.org/packages/community/manjaro-arm-qemu-static/-/raw/master/qemu-static.conf -O /usr/lib/binfmt.d/qemu-static.conf
+        sudo service systemd-binfmt restart
+          
+    - 
+      name: install-arch-install-scripts
+      shell: bash
+      env:
+        VERSION: 24
+      run: |
+        sudo wget https://github.com/archlinux/arch-install-scripts/archive/refs/tags/v${VERSION}.tar.gz -O arch-install-scripts.tar.gz
+        sudo tar -xvf arch-install-scripts.tar.gz
+        sudo make -C arch-install-scripts-${VERSION}
+        sudo make -C arch-install-scripts-${VERSION} check
+        sudo make -C arch-install-scripts-${VERSION} PREFIX=/usr install
+    -
+      name: install-manjaro-arm-tools
+      shell: bash
+      run: |
+        sudo git clone https://gitlab.manjaro.org/manjaro-arm/applications/manjaro-arm-tools.git
+        install_m_a_tools() {
+            pkgname=manjaro-arm-tools
+            sudo install -dm777 /usr/share/$pkgname/lib
+            sudo install -dm777 /usr/share/$pkgname/profiles
+            sudo install -d /etc/$pkgname/
+            sudo install -dm777 /var/lib/$pkgname/{pkg,img,tmp,profiles}
+            sudo install -dm777 /var/cache/$pkgname/{pkg/pkg-cache,img}
+            sudo install -Dm755 $pkgname/lib/* /usr/share/$pkgname/lib/
+            sudo install -Dm755 $pkgname/bin/* /usr/bin/
+            sudo install -Dm755 $pkgname/lib/manjaro-arm-tools.conf /etc/manjaro-arm-tools/
+        }
+        install_m_a_tools
+          
+        sudo sed -i -e 's|1>/dev/null||g' /usr/share/manjaro-arm-tools/lib/functions.sh   
+        sudo sed -i -e 's|1> /dev/null 2>&1||g' /usr/share/manjaro-arm-tools/lib/functions.sh
+        sudo sed -i -e 's|2>/dev/null||g' /usr/share/manjaro-arm-tools/lib/functions.sh 
+    - 
+      name: checkout-arm-profiles
+      shell: bash
+      env:
+        REPO: ${{ inputs.arm-profiles-repo }}
+      run: |
+        sudo git clone --depth 1 ${REPO} arm-profiles         
+    -
+      id: build
+      shell: bash
+      env:
+        DEVICE: ${{ inputs.device }}
+        EDITION: ${{ inputs.edition }}
+        BRANCH: ${{ inputs.branch }}
+        VERSION: ${{ inputs.version }}
+        IMGTYPE: ${{ inputs.imgtype }}
+        #CI_PUB_KEY: ${{ inputs.CI_PUB_KEY }}
+        #CI_GPG_SECRET: ${{ inputs.CI_GPG_SECRET }}
+        #CI_GPG_PASSPHRASE: ${{ inputs.CI_GPG_PASSPHRASE }}
+      run: |
+        mkdir packages
+        wget https://github.com/silime/kernel-builder/releases/download/linux_firmware-20220509-5/linux-firmware-oneplus-sdm845-20220509.b19cbdc-1-any.pkg.tar.zst -P packages
+        wget https://github.com/silime/kernel-builder/releases/download/linux_firmware-20220509-5/linux-firmware-oneplus-sdm845-qcom-20220509.b19cbdc-1-any.pkg.tar.zst -P packages
+        wget https://github.com/silime/kernel-builder/releases/download/linux_firmware-20220509-5/linux-firmware-oneplus-sdm845-whence-20220509.b19cbdc-1-any.pkg.tar.zst -P packages
+        wget https://github.com/silime/kernel-builder/releases/download/arch-5.19-1/linux-sdm845-5.19-1-aarch64.pkg.tar.zst -P packages
+        wget https://github.com/silime/kernel-builder/releases/download/alsa-ucm-oneplus-0.5.8-8/alsa-ucm-oneplus-0.5.8-8-any.pkg.tar.zst -P packages
+        wget https://github.com/silime/kernel-builder/releases/download/refs%2Fheads%2Fmain/modemmanager-1.18.10-2-aarch64.pkg.tar.zst -P packages
+        wget https://github.com/silime/kernel-builder/releases/download/refs%2Fheads%2Fmain/modemmanager-debug-1.18.10-2-aarch64.pkg.tar.zst -P packages
+        [ "$IMGTYPE" != "factory" ] && unset IMGTYPE
+        sudo mv -v $GITHUB_WORKSPACE/arm-profiles /usr/share/manjaro-arm-tools/profiles
+        if [ -z ${{ inputs.overlay-repo }} ]; then 
+          sudo buildarmimg -d $DEVICE -e $EDITION -v $VERSION -b $BRANCH ${IMGTYPE:+-f}
+        else
+          sudo buildarmimg -d $DEVICE -e $EDITION -v $VERSION -b $BRANCH -k ${{ inputs.overlay-repo }} -i packages ${IMGTYPE:+-f}
+        fi
+          
+        ls -lasih /var/cache/manjaro-arm-tools/img
+          
+        FILE_PATH=$(find /var/cache/manjaro-arm-tools/img -type f -name "*.img.xz" -exec stat -c '%Y %n' {} \; | sort -nr | awk 'NR==1 {print $2}')
+        cp -v $FILE_PATH .
+        echo "::set-output name=file-path::$(basename $FILE_PATH)"
+          
+        sha1sum $(basename $FILE_PATH) > $(basename $FILE_PATH).sha1
+        echo "::set-output name=file-sha1::$(basename $FILE_PATH).sha1"
+        mktorrent -v -a udp://tracker.opentrackr.org:1337 -l 21 -w https://github.com/$GITHUB_REPOSITORY/releases/download/$VERSION/$(basename $FILE_PATH) -o $(basename $FILE_PATH).torrent $(basename $FILE_PATH)
+        echo "::set-output name=file-torrent::$(basename $FILE_PATH).torrent"
+        
+        # Do GPG signing
+        #echo "setup values"
+        #GPG_HOMEDIR="$(mktemp -d -t gnupg.XXX)"
+        #SECRET_KEY_FILE="$GPG_HOMEDIR/secret.key"
+        #PUBLIC_KEY_FILE="$GPG_HOMEDIR/public_key.gpg"
+        #PASSPHRASE_FILE="$GPG_HOMEDIR/passphrase.file"
+        #GPG="gpg --homedir=$GPG_HOMEDIR --no-tty --batch --yes"
+          
+        #echo "unpack public key"
+        #echo "$CI_PUB_KEY" | base64 --decode > "$PUBLIC_KEY_FILE"
+
+        #echo "unpack secret key"
+        #echo "$CI_GPG_SECRET" | base64 --decode > "$SECRET_KEY_FILE"
+          
+        #echo "passphrase"
+        #echo "$CI_GPG_PASSPHRASE" > "$PASSPHRASE_FILE"
+          
+        #echo "Secrets unpacked..."
+
+        #paperkey --pubring "$PUBLIC_KEY_FILE" --secrets "$SECRET_KEY_FILE" \
+        #| $GPG --import &>/dev/null
+
+        #$GPG --pinentry-mode loopback --detach-sign --use-agent -u "$CI_GPG_KEY" --passphrase-file "$PASSPHRASE_FILE" $(basename $FILE_PATH)
+
+        #ls -lasih
+          
+        #echo "Verifying file"
+        #$GPG --verify $(basename $FILE_PATH).sig $(basename $FILE_PATH)
+        #echo "::set-output name=file-signature::$(basename $FILE_PATH).sig"
+          
+        #echo "cleaning up"
+        #find "$GPG_HOMEDIR" -type f -exec shred {} \;
+        #rm -rf "$GPG_HOMEDIR"
+        #echo "script done"
+          
+        # Copy filepaths
+        echo "FILE_PATH=$(basename $FILE_PATH)" >> $GITHUB_ENV
+        echo "FILE_SHA1=$(basename $FILE_PATH).sha1" >> $GITHUB_ENV
+        echo "FILE_TORRENT=$(basename $FILE_PATH).torrent" >> $GITHUB_ENV
+        #echo "FILE_SIG=$(basename $FILE_PATH).sig" >> $GITHUB_ENV
+          
+        FILE_PKG=$(find /var/cache/manjaro-arm-tools/img -type f -name "*-pkgs.txt" -exec stat -c '%Y %n' {} \; | sort -nr | awk 'NR==1 {print $2}')
+        cp -v $FILE_PKG .
+        echo "::set-output name=file-pkg::$(basename $FILE_PKG)"
+        echo "FILE_PKG=$(basename $FILE_PKG)" >> $GITHUB_ENV
+
+#    -
+#      id: gpg_sign
+#      shell: bash
+#      run: |
+#        if [ -z "${{ inputs.CI_GPG_SECRET }}" ]; then 
+#          echo "no gpg secret given"
+#          exit 0
+#        fi
+#        cat <(echo -e "${{ inputs.CI_GPG_SECRET }}" | base64 --decode) | gpg --batch --import
+#        shopt -s extglob
+#        gpg --pinentry-mode loopback --passphrase "${{ inputs.CI_GPG_PASSPHRASE }}" --detach-sign $(basename $FILE_PATH)
+#        echo "FILE_SIG=$(basename $FILE_PATH).sig" >> $GITHUB_ENV
