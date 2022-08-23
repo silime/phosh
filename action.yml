@@ -177,9 +177,9 @@ runs:
         wget https://github.com/silime/kernel-builder/releases/download/linux_firmware-20220509-5/linux-firmware-oneplus-sdm845-qcom-20220509.b19cbdc-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/kernel-builder/releases/download/linux_firmware-20220509-5/linux-firmware-oneplus-sdm845-whence-20220509.b19cbdc-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/kernel-builder/releases/download/arch-5.19-1/linux-sdm845-5.19-1-aarch64.pkg.tar.zst -P packages
-        wget https://github.com/silime/kernel-builder/releases/download/alsa-ucm-oneplus-0.5.8-8/alsa-ucm-oneplus-0.5.8-8-any.pkg.tar.zst -P packages
-        wget https://github.com/silime/kernel-builder/releases/download/refs%2Fheads%2Fmain/modemmanager-1.18.10-2-aarch64.pkg.tar.zst -P packages
-        wget https://github.com/silime/kernel-builder/releases/download/refs%2Fheads%2Fmain/modemmanager-debug-1.18.10-2-aarch64.pkg.tar.zst -P packages
+        wget https://github.com/silime/kernel-builder/releases/download/alsa-ucm-oneplus-0.5.9-0/alsa-ucm-oneplus-0.5.9-0-any.pkg.tar.zst -P packages
+        wget https://github.com/silime/kernel-builder/releases/download/ModemManager/modemmanager-1.18.10-2-aarch64.pkg.tar.zst -P packages
+        
         [ "$IMGTYPE" != "factory" ] && unset IMGTYPE
         sudo mv -v $GITHUB_WORKSPACE/arm-profiles /usr/share/manjaro-arm-tools/profiles
         if [ -z ${{ inputs.overlay-repo }} ]; then 
