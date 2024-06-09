@@ -229,8 +229,8 @@ runs:
         sudo chown $USER /mnt/*
         FILE_PATH1=$(find /mnt -type f -name "*root.img" -exec stat -c '%Y %n' {} \; | sort -nr | awk 'NR==1 {print $2}')
         #TODO img2simg 
-        tar -Jcvf /mnt/"$(basename $FILE_PATH .img)"-rootfs.tar.xz  -C  $FILE_PATH1 ./manjaro-boot.img 
-        tar -Jcvf /mnt/"$(basename $FILE_PATH .img)".tar.xz  -C $FILE_PATH
+        tar -Jcvf /mnt/"$(basename $FILE_PATH .img)"-rootfs.tar.xz  $FILE_PATH1 ./manjaro-boot.img 
+        tar -Jcvf /mnt/"$(basename $FILE_PATH .img)".tar.xz  $FILE_PATH
         rm $FILE_PATH1
         ls -lasih /var/cache/manjaro-arm-tools/img
         ls -lasih /mnt
