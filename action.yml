@@ -84,7 +84,8 @@ runs:
           gpg \
           ca-certificates \
           u-boot-tools \
-          abootimg
+          abootimg 
+        #android-sdk-libsparse-utils
         sudo pip3 install meson
         sudo pip3 install ninja
         
@@ -182,7 +183,7 @@ runs:
         wget https://github.com/silime/kernel-builder/releases/download/linux_firmware-20230515/linux-firmware-oneplus-sdm845-qcom-20230515.51290942-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/kernel-builder/releases/download/linux_firmware-20230515/linux-firmware-oneplus-sdm845-sensors-20230515.51290942-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/kernel-builder/releases/download/linux_firmware-20230515/linux-firmware-oneplus-sdm845-whence-20230515.51290942-1-any.pkg.tar.zst -P packages
-        wget https://github.com/silime/kernel-builder/releases/download/arch-6.4/linux-sdm845-6.4-0-aarch64.pkg.tar.zst -P packages
+        wget https://github.com/silime/ArchLinux-Packages/releases/download/arch-6.10-rc2/linux-sdm845-6.10.0-2-aarch64.pkg.tar.zst -P packages
         wget https://github.com/silime/kernel-builder/releases/download/alsa-ucm-oneplus-0.5.10/alsa-ucm-oneplus-0.5.10-0-any.pkg.tar.zst -P packages
         wget https://github.com/silime/kernel-builder/releases/download/ModemManager/modemmanager-1.20.6-1-aarch64.pkg.tar.zst -P packages
         wget https://github.com/silime/kernel-builder/releases/download/ModemManager/libmm-glib-1.20.6-1-aarch64.pkg.tar.zst -P packages
@@ -213,26 +214,29 @@ runs:
         sudo mount $BOOT_LOOP /var/cache/manjaro-arm-tools/boot
         sudo mount $ROOT_LOOP /var/cache/manjaro-arm-tools/root
         ls -lasih /var/cache/manjaro-arm-tools/boot 
-        cp /var/cache/manjaro-arm-tools/boot/vmlinuz-linux-sdm845 ./vmlinuz-linux-sdm845
+        cp /var/cache/manjaro-arm-tools/boot/vmlinuz ./vmlinuz-linux-sdm845
+        git clone https://gitlab.com/sdm845-mainline/initrd
+        pushd initrd && sudo ./build.sh && popd
         cat /var/cache/manjaro-arm-tools/boot/dtb/linux-sdm845/qcom/sdm845-oneplus-fajita.dtb >> ./vmlinuz-linux-sdm845
-        sudo abootimg --create ./manjaro-boot.img -k ./vmlinuz-linux-sdm845 -r /var/cache/manjaro-arm-tools/boot/initramfs-linux-sdm845.img -c "cmdline= root=/dev/sda17"
-        sudo cp -r /var/cache/manjaro-arm-tools/boot /var/cache/manjaro-arm-tools/root/boot
+        sudo abootimg --create ./manjaro-boot.img -k ./vmlinuz-linux-sdm845 -r initrd/initrd.cpio.gz -c "cmdline=rootfs_part=sda17 rootfs_path="$(basename $FILE_PATH .img)"-root.img"
+        sudo cp -r /var/cache/manjaro-arm-tools/boot/* /var/cache/manjaro-arm-tools/root/boot
         sudo sed 1d /var/cache/manjaro-arm-tools/root/etc/fstab
         sudo umount  /var/cache/manjaro-arm-tools/root/
         sudo umount  /var/cache/manjaro-arm-tools/boot/
         sudo dd if=$ROOT_LOOP of=/var/cache/manjaro-arm-tools/img/"$(basename $FILE_PATH .img)"-root.img  bs=4M 
         sudo rm $FILE_PATH
         FILE_PATH1=$(find /var/cache/manjaro-arm-tools/img -type f -name "*root.img" -exec stat -c '%Y %n' {} \; | sort -nr | awk 'NR==1 {print $2}')
-        sudo tar -Jcvf $FILE_PATH.tar.xz $FILE_PATH1 ./manjaro-boot.img
+        #TODO img2simg 
+        sudo tar -Jcvf $FILE_PATH-rootfs.tar.xz  -C  $FILE_PATH1 ./manjaro-boot.img 
+        sudo tar -Jcvf $FILE_PATH.tar.xz  -C $FILE_PATH
         sudo rm $FILE_PATH1
-        echo "tar -Jcvf $FILE_PATH.tar.xz "
-        sudo chmod 777 $FILE_PATH.tar.xz
-        echo "chmod file"
         ls -lasih /var/cache/manjaro-arm-tools/img
+        ROOTFS_PATH=$FILE_PATH-rootfs.tar.xz
         cp -v $FILE_PATH.tar.xz .
+        cp -v $ROOTFS_PATH .
         FILE_PATH=$FILE_PATH.tar.xz
         echo "file-path=$(basename $FILE_PATH)" >> $GITHUB_OUTPUT
-        echo "aaa"  
+        echo "file-path=$(basename $ROOTFS_PATH)" >> $GITHUB_OUTPUT
         sha256sum $(basename $FILE_PATH) > $(basename $FILE_PATH).sha256
         echo "file-sha256=$(basename $FILE_PATH).sha256" >> $GITHUB_OUTPUT
         mktorrent -v -a udp://tracker.opentrackr.org:1337 -l 21 -w https://github.com/$GITHUB_REPOSITORY/releases/download/$VERSION/$(basename $FILE_PATH) -o $(basename $FILE_PATH).torrent $(basename $FILE_PATH)
