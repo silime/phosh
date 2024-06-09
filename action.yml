@@ -224,16 +224,17 @@ runs:
         sudo sed 1d /var/cache/manjaro-arm-tools/root/etc/fstab
         sudo umount  /var/cache/manjaro-arm-tools/root/
         sudo umount  /var/cache/manjaro-arm-tools/boot/
-        sudo dd if=$ROOT_LOOP of=/var/cache/manjaro-arm-tools/img/"$(basename $FILE_PATH .img)"-root.img  bs=4M 
-        sudo rm $FILE_PATH
-        FILE_PATH1=$(find /var/cache/manjaro-arm-tools/img -type f -name "*root.img" -exec stat -c '%Y %n' {} \; | sort -nr | awk 'NR==1 {print $2}')
+        sudo dd if=$ROOT_LOOP of=/mnt/"$(basename $FILE_PATH .img)"-root.img  bs=4M 
+        FILE_PATH1=$(find /mnt -type f -name "*root.img" -exec stat -c '%Y %n' {} \; | sort -nr | awk 'NR==1 {print $2}')
         #TODO img2simg 
-        sudo tar -Jcvf $FILE_PATH-rootfs.tar.xz  -C  $FILE_PATH1 ./manjaro-boot.img 
-        sudo tar -Jcvf $FILE_PATH.tar.xz  -C $FILE_PATH
+        sudo tar -Jcvf /mnt/"$(basename $FILE_PATH .img)"-rootfs.tar.xz  -C  $FILE_PATH1 ./manjaro-boot.img 
+        sudo tar -Jcvf /mnt/"$(basename $FILE_PATH .img)".tar.xz  -C $FILE_PATH
         sudo rm $FILE_PATH1
         ls -lasih /var/cache/manjaro-arm-tools/img
-        ROOTFS_PATH=$FILE_PATH-rootfs.tar.xz
-        cp -v $FILE_PATH.tar.xz .
+        ls -lasih /mnt
+        ROOTFS_PATH=/mnt/"$(basename $FILE_PATH .img)-rootfs.tar.xz
+        sudo rm $FILE_PATH
+        cp -v /mnt/"$(basename $FILE_PATH .img).tar.xz .
         cp -v $ROOTFS_PATH .
         FILE_PATH=$FILE_PATH.tar.xz
         echo "file-path=$(basename $FILE_PATH)" >> $GITHUB_OUTPUT
