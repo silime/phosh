@@ -226,6 +226,7 @@ runs:
         sudo umount  /var/cache/manjaro-arm-tools/boot/
         sudo dd if=$ROOT_LOOP of=/mnt/"$(basename $FILE_PATH .img)"-root.img  bs=4M 
         sudo chown $USER /mnt/
+        sudo chown $USER /mnt/*
         FILE_PATH1=$(find /mnt -type f -name "*root.img" -exec stat -c '%Y %n' {} \; | sort -nr | awk 'NR==1 {print $2}')
         #TODO img2simg 
         tar -Jcvf /mnt/"$(basename $FILE_PATH .img)"-rootfs.tar.xz  -C  $FILE_PATH1 ./manjaro-boot.img 
