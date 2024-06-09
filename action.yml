@@ -234,9 +234,9 @@ runs:
         rm $FILE_PATH1
         ls -lasih /var/cache/manjaro-arm-tools/img
         ls -lasih /mnt
-        ROOTFS_PATH=/mnt/"$(basename $FILE_PATH .img)-rootfs.tar.xz
+        ROOTFS_PATH=/mnt/"$(basename $FILE_PATH .img)"-rootfs.tar.xz
         sudo rm $FILE_PATH
-        cp -v /mnt/"$(basename $FILE_PATH .img).tar.xz .
+        cp -v /mnt/"$(basename $FILE_PATH .img)".tar.xz .
         cp -v $ROOTFS_PATH .
         FILE_PATH=$FILE_PATH.tar.xz
         echo "file-path=$(basename $FILE_PATH)" >> $GITHUB_OUTPUT
