@@ -217,7 +217,7 @@ runs:
         cp /var/cache/manjaro-arm-tools/boot/vmlinuz ./vmlinuz-linux-sdm845
         git clone https://gitlab.com/sdm845-mainline/initrd
         pushd initrd && sudo ./build.sh && popd
-        cat /var/cache/manjaro-arm-tools/boot/dtb/linux-sdm845/qcom/sdm845-oneplus-fajita.dtb >> ./vmlinuz-linux-sdm845
+        cat /var/cache/manjaro-arm-tools/boot/dtbs/qcom/sdm845-oneplus-fajita.dtb >> ./vmlinuz-linux-sdm845
         sudo abootimg --create ./manjaro-boot.img -k ./vmlinuz-linux-sdm845 -r initrd/initrd.cpio.gz -c "cmdline=rootfs_part=sda17 rootfs_path="$(basename $FILE_PATH .img)"-root.img"
         sudo cp -r /var/cache/manjaro-arm-tools/boot/* /var/cache/manjaro-arm-tools/root/boot
         sudo sed 1d /var/cache/manjaro-arm-tools/root/etc/fstab
