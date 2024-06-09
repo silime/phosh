@@ -179,6 +179,7 @@ runs:
         #CI_GPG_PASSPHRASE: ${{ inputs.CI_GPG_PASSPHRASE }}
       run: |
         mkdir packages
+        df -h
         wget https://github.com/silime/kernel-builder/releases/download/linux_firmware-20230515/linux-firmware-oneplus-sdm845-20230515.51290942-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/kernel-builder/releases/download/linux_firmware-20230515/linux-firmware-oneplus-sdm845-qcom-20230515.51290942-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/kernel-builder/releases/download/linux_firmware-20230515/linux-firmware-oneplus-sdm845-sensors-20230515.51290942-1-any.pkg.tar.zst -P packages
