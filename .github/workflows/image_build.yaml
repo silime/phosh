@@ -62,6 +62,16 @@ jobs:
           asset_name: ${{ env.FILE_PATH }}
           asset_content_type: application/x-iso-image
       - 
+        id: upload_rootfs 
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.prepare_release.outputs.upload_url }}
+          asset_path: ./${{ env.ROOTFS_PATH }}
+          asset_name: ${{ env.ROOTFS_PATH }}
+          asset_content_type: application/x-iso-image
+      - 
         id: upload_sha1
         uses: actions/upload-release-asset@v1.0.2
         env:
