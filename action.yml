@@ -192,7 +192,7 @@ runs:
         wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/hexagonrpcd-0.1.0-0-aarch64.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/iio-sensor-proxy-3.5+r18+gc70950f-1-aarch64.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/libssc-0.1.6-1-aarch64.pkg.tar.zst -P packages
-        wget https://github.com/silime/kernel-builder/releases/download/sensors/qmic-git-1.0.r0.g4574736-1-aarch64.pkg.tar.zst -P packages
+        wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/qmic-git-1.0.r0.g4574736-1-aarch64.pkg.tar.zst -P packages
         [ "$IMGTYPE" != "factory" ] && unset IMGTYPE
         sudo mv -v $GITHUB_WORKSPACE/arm-profiles /usr/share/manjaro-arm-tools/profiles
         if [ -z ${{ inputs.overlay-repo }} ]; then 
