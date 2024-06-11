@@ -204,6 +204,7 @@ runs:
         ls -lasih /var/cache/manjaro-arm-tools/img
           
         FILE_PATH=$(find /var/cache/manjaro-arm-tools/img -type f -name "*.img" -exec stat -c '%Y %n' {} \; | sort -nr | awk 'NR==1 {print $2}')
+        tar -Jcvf "$(basename $FILE_PATH)".tar.xz  $FILE_PATH
         # mount img
         LOOP=`sudo losetup -f --show -P $FILE_PATH`
         BOOT_LOOP="$LOOP"p1
@@ -220,7 +221,7 @@ runs:
         cat /var/cache/manjaro-arm-tools/boot/dtbs/qcom/sdm845-oneplus-fajita.dtb >> ./vmlinuz-linux-sdm845
         sudo abootimg --create /mnt/out/manjaro-fajita-boot.img -k ./vmlinuz-linux-sdm845 -r initrd/initrd.cpio.gz -c "cmdline=rootfs_part=sda17 rootfs_path="$(basename $FILE_PATH .img)"-root.img"
         sudo cp -r /var/cache/manjaro-arm-tools/boot/* /var/cache/manjaro-arm-tools/root/boot
-        sudo sed 1d /var/cache/manjaro-arm-tools/root/etc/fstab
+        sudo sed -i '/\/boot/s/^/# /' /var/cache/manjaro-arm-tools/root/etc/fstab
         sudo umount  /var/cache/manjaro-arm-tools/root/
         sudo umount  /var/cache/manjaro-arm-tools/boot/
         sudo dd if=$ROOT_LOOP of=/mnt/out/"$(basename $FILE_PATH .img)"-root.img  bs=4M 
@@ -228,7 +229,6 @@ runs:
         sudo chown $USER /mnt/*
         #TODO img2simg 
         tar -Jcvf "$(basename $FILE_PATH .img)"-rootfs.tar.xz  -C /mnt/out .
-        tar -Jcvf "$(basename $FILE_PATH)".tar.xz  $FILE_PATH
         ls -lasih /var/cache/manjaro-arm-tools/img
         ls -lasih /mnt
         ls -lasih ./
