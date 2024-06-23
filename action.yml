@@ -179,15 +179,17 @@ runs:
         #CI_GPG_PASSPHRASE: ${{ inputs.CI_GPG_PASSPHRASE }}
       run: |
         mkdir packages
-        df -h
+        wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/bootmac-0.5.0-0-aarch64.pkg.tar.zst -P packages
+        wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/soc-qcom-sdm845-1.0-1-any.pkg.tar.zst -P packages
+        wget 
         wget https://github.com/silime/ArchLinux-Packages/releases/download/linux_firmware-20240608/linux-firmware-oneplus-sdm845-20240510.b9d2bf23-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/linux_firmware-20240608/linux-firmware-oneplus-sdm845-qcom-20240510.b9d2bf23-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/linux_firmware-20240608/linux-firmware-oneplus-sdm845-sensors-20240510.b9d2bf23-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/linux_firmware-20240608/linux-firmware-oneplus-sdm845-whence-20240510.b9d2bf23-1-any.pkg.tar.zst -P packages
-        wget https://github.com/silime/ArchLinux-Packages/releases/download/arch-6.9.0-2/linux-sdm845-6.9-2-aarch64.pkg.tar.zst -P packages
-        wget https://github.com/silime/ArchLinux-Packages/releases/download/alsa-ucm-oneplus-0.5.10/alsa-ucm-oneplus-0.5.10-0-any.pkg.tar.zst -P packages
-        wget https://github.com/silime/ArchLinux-Packages/releases/download/q6voice/q6voiced-0_git20210408-0-aarch64.pkg.tar.zst -P packages
-        wget https://github.com/silime/ArchLinux-Packages/releases/download/q6voice/tinyalsa-git-2.0.0+45.r582.20220803.4fbaeef-3-aarch64.pkg.tar.zst -P packages
+        wget https://github.com/silime/ArchLinux-Packages/releases/download/arch-6.10/linux-sdm845-6.10.0-3-aarch64.pkg.tar.zst  -P packages
+        wget https://github.com/silime/ArchLinux-Packages/releases/download/alsa-ucm-oneplus-0.5.10/alsa-ucm-oneplus-0.5.12-0-any.pkg.tar.zst -P packages
+        wget https://github.com/silime/ArchLinux-Packages/releases/download/q6voice/q6voiced-0_git20240608-0-aarch64.pkg.tar.zst -P packages
+        wget https://github.com/silime/ArchLinux-Packages/releases/download/q6voice/tinyalsa-git-2.0.0+58.r595.20240621.7f06b2f-1-aarch64.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/oneplus-devices-udev-0.0.2-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/hexagonrpcd-0.3.2-0-aarch64.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/iio-sensor-proxy-3.5+r18+gc70950f-1-aarch64.pkg.tar.zst -P packages
