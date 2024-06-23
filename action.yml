@@ -185,7 +185,7 @@ runs:
         wget https://github.com/silime/ArchLinux-Packages/releases/download/linux_firmware-20240608/linux-firmware-oneplus-sdm845-qcom-20240510.b9d2bf23-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/linux_firmware-20240608/linux-firmware-oneplus-sdm845-sensors-20240510.b9d2bf23-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/linux_firmware-20240608/linux-firmware-oneplus-sdm845-whence-20240510.b9d2bf23-1-any.pkg.tar.zst -P packages
-        wget https://github.com/silime/ArchLinux-Packages/releases/download/arch-6.10/linux-sdm845-6.10.0-3-aarch64.pkg.tar.zst  -P packages
+        wget https://github.com/silime/ArchLinux-Packages/releases/download/arch-6.9.0-2/linux-sdm845-6.9-2-aarch64.pkg.tar.zst  -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/alsa-ucm-oneplus-0.5.10/alsa-ucm-oneplus-0.5.12-0-any.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/q6voice/q6voiced-0_git20240608-0-aarch64.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/q6voice/tinyalsa-git-2.0.0+58.r595.20240621.7f06b2f-1-aarch64.pkg.tar.zst -P packages
