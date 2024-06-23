@@ -180,8 +180,7 @@ runs:
       run: |
         mkdir packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/bootmac-0.5.0-0-aarch64.pkg.tar.zst -P packages
-        wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/soc-qcom-sdm845-1.0-1-any.pkg.tar.zst -P packages
-        wget 
+        wget https://github.com/silime/ArchLinux-Packages/releases/download/sensors/soc-qcom-sdm845-1.0-1-any.pkg.tar.zst -P packages 
         wget https://github.com/silime/ArchLinux-Packages/releases/download/linux_firmware-20240608/linux-firmware-oneplus-sdm845-20240510.b9d2bf23-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/linux_firmware-20240608/linux-firmware-oneplus-sdm845-qcom-20240510.b9d2bf23-1-any.pkg.tar.zst -P packages
         wget https://github.com/silime/ArchLinux-Packages/releases/download/linux_firmware-20240608/linux-firmware-oneplus-sdm845-sensors-20240510.b9d2bf23-1-any.pkg.tar.zst -P packages
