@@ -72,3 +72,10 @@ dd if=/dev/block/by-name/boot_a of=/sdcard/boot_a
 fastboot erase dtbo
 fastboot boot [the file that ends in -boot.img]
 ```
+## Bugs
+Run the following command to start the necessary services to make your modem work 
+```
+systemctl enable q6voiced.service && systemctl start q6voiced.service
+systemctl enable msm-modem-uim-selection.service && systemctl start  msm-modem-uim-selection.service
+systemctl enable call_audio_idle_suspend_workaround.service && systemctl start  call_audio_idle_suspend_workaround.service
+```
